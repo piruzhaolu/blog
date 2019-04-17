@@ -1,0 +1,10 @@
+# Mathematics 常用API简介
+[代码参考](../BlogProject/Assets/Unity.​Mathematics/MathematicsTest.cs)
+
+### RigidTransform 
+存储位置与旋转信息(没有缩放)。可通过new和一堆静态方法构建一个RigidTransform, RotateX(float angle),RotateY(float angle),RotateZ(float angle) 三个静态方法的参数是弧度值。
+
+### math.mul
+math.mul方法有199个重载，不过逻辑都一样就是各种相乘
+* math.mul(RigidTransform a,RigidTransform b) 返回:RigidTransform 表示a通过b变换后的值[参考：KeyCode.B]
+* math.mul(quaternion a,float3 b) 返回:float3 相对于a旋转下进行b向量的偏移值 [参考：KeyCode.B]

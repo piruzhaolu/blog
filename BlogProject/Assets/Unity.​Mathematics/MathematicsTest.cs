@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Mathematics;
 
+
+[ExecuteInEditMode]
 public class MathematicsTest : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public GameObject Target;
+    
+
+    public bool LookRotation = false;
+
 
     // Update is called once per frame
     void Update()
@@ -23,9 +25,15 @@ public class MathematicsTest : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.B))
         {
-            RigidTransform rigidTransform = new RigidTransform(transform.rotation, transform.position);
             var v = math.mul((quaternion)transform.rotation, new float3(0, 0, 1));
             transform.position += (Vector3) v;
+        }
+
+        if (LookRotation)
+        {
+            float3 f3 = Target.transform.position - transform.position;
+            f3.y = 0;
+            transform.rotation  = quaternion.LookRotation(f3, math.up());
         }
     }
 }

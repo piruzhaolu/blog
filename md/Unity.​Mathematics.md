@@ -14,3 +14,6 @@ math.mul方法有199个重载，不过逻辑都一样就是各种相乘
 ### math.all 和 math.any
 * math.all(int3) math.all(bool3) xyz都不等于0 或 都为true 返回true, 否则返回false。 int4 float2之类同理
 * math.any xyz有一个不等于0或有一个等true 返回true, 否则返回false
+
+### quaternion
+quaternion **LookRotation(float3 forward, float3 up)** 朝向forward向量指向的方向

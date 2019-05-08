@@ -6,8 +6,10 @@
 
 ### math.mul
 math.mul方法有199个重载，不过逻辑都一样就是各种相乘
-* math.mul(RigidTransform a,RigidTransform b) 返回:RigidTransform 表示a通过b变换后的值[参考：KeyCode.B]
-* math.mul(quaternion a,float3 b) 返回:float3 相对于a旋转下进行b向量的偏移值 [参考：KeyCode.B]
+* RigidTransform **math.mul(RigidTransform a,RigidTransform b)** 表示a通过b变换后的值[参考：KeyCode.B](../BlogProject/Assets/Unity.​Mathematics/MathematicsTest.cs)
+* float3 **math.mul(quaternion a,float3 b)** 相对于a旋转下进行b向量的偏移值 [参考：KeyCode.B](../BlogProject/Assets/Unity.​Mathematics/MathematicsTest.cs)
+
+
 
 ### math.all 和 math.any
 * math.all(int3) math.all(bool3) xyz都不等于0 或 都为true 返回true, 否则返回false。 int4 float2之类同理

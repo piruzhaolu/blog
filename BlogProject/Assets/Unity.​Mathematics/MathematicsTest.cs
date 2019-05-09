@@ -32,7 +32,9 @@ public class MathematicsTest : MonoBehaviour
         if (LookRotation)
         {
             float3 f3 = Target.transform.position - transform.position;
-            f3.y = 0;
+           // f3.y = 0;
+            var b = quaternion.LookRotationSafe(float3.zero, math.up());
+            Debug.Log(b);
             transform.rotation  = quaternion.LookRotation(f3, math.up());
         }
     }

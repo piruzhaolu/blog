@@ -4,9 +4,9 @@ Job System 官方全名叫 Unity C# Job System，个人理解就是Unity开发�
 
 没有很好支持多线程很大原因在于传统的多线程在处理游戏逻辑上有些问题，游戏逻辑代码的特点是单代码块的执行成本低，但要在16毫秒或33毫秒内执行大量的代码块。不管是为每个代码块创建一个线程还是用线程池，基中线程处理本身消耗的成本都会抵销其带来的好处。没有很好支持多线程还有个问题是多线程编程本身的复杂度问题，两个线程写冲突和依赖关系很容易引起难于调试的异常。
 
-虽然多线程处理游戏会有些问题，但当前千元的手机都有八核CPU配置，没办法利用这么多核心极大的资源浪费。而Unity在这个时间点配合ECS推出Job System也就理所当然。接下来看看Job System怎么使用以及如果处理传统多线程的一些问题。
+虽然多线程处理游戏会有些问题，但当前千元的手机都有八核CPU配置，没办法利用这么多核心是极大的资源浪费。而Unity在这个时间点配合ECS推出Job System也就理所当然。接下来看看Job System怎么使用以及如何处理传统多线程的一些问题。
 
-Job System与线程相应的概念的叫Job,但Job并不是对线程的封装，个人觉得把Job当成一个函数会更容易理解。一个Job像一个函数处理一单一逻辑。Job System在初始化时会创建CPU核心数减1线程（实际比这复杂，内部会根据大小核等硬件资源做一些选择），然后把所有Job根据一定策略分配到这些线程并行执行。因为Job System只会在初始化时创建与CPU核心匹配的线程，所以不存在频繁创建线程的成本，也不会因为多个线程抢占一个CPU资源和引起上下文切换时的损耗，只要Job System能合理分配Job就能充分利用CPU资源而较少的副作用。
+Job System与线程相应的概念的叫Job,但Job并不是对线程的封装，个人觉得把Job当成一个函数会更容易理解。一个Job像一个函数处理单一逻辑。Job System在初始化时会创建CPU核心数减1的线程（实际比这复杂，内部会根据大小核等硬件资源做一些选择），然后把所有Job根据一定策略分配到这些线程并行执行。因为Job System只会在初始化时创建与CPU核心匹配的线程，所以不存在频繁创建线程的成本，也不会因为多个线程抢占一个CPU资源和引起上下文切换时的损耗，只要Job System能合理分配Job就能充分利用CPU资源而较少的副作用。
 
 一个Job的实际代码像这样：
 ```C#
@@ -21,7 +21,7 @@ struct Multiply : IJob
     }
 }
 ```
-整个Job是一个实现IJob接口的struct，a、b 是输入的两个参数， result是执行的结果，Execute是执行逻辑。NativeArray\<int\>类型的result比较容易引起困惑，NativeArray\<int\>是DOTS引入的一部分，官方叫NativeContainer，除了NativeArray还有NativeHashMap等其它类型，NativeContainer的目的是让不同的Job能访问共享的内存。虽然Job并不代表一个线程，但不同的Job很可能在不同的线程处理，不同的Job之前是不能互相访问的，它们也不被允许访问全局变量，所以NativeContainer是它们进行数据交互的方式。我们先看完Job调用代码再说说NativeContainer问题
+整个Job是一个实现IJob接口的struct，a、b 是输入的两个参数， result是执行的结果，Execute是执行逻辑。整体还是比较简单的，除了NativeArray\<int\>类型的result比较容易引起困惑，NativeArray\<int\>是DOTS引入的一部分，官方叫NativeContainer，除了NativeArray还有NativeHashMap等其它类型，NativeContainer的目的是让不同的Job能访问共享的内存。虽然Job并不代表一个线程，但不同的Job很可能在不同的线程处理，不同的Job之间是不能互相访问的，它们也不被允许访问全局变量，所以NativeContainer是它们进行数据交互的方式。我们先看完Job调用代码再说说NativeContainer问题
 
 Job的调用代码如下：
 ```C#
@@ -44,7 +44,8 @@ handle2.Complete();
 var handle2 = new Multiply() { a = 15, b = 30, result = result2 }.Schedule(handle);
 ```
 
+回头说下NativeContainer。代码中使用NativeArray来存储执行的结果，NativeArray的声明和Array相比多了一个Allocator参数，Allocator参数是个枚举，值分别是Allocator.Temp、Allocator.TempJob、Allocator.Persistent。三者的区别是生命周期不同和性能差别，Temp用于一帧内即回收数据，性能最好；TempJob生命周期是4帧，通常用于Job中，性能次于Temp；Persistent可以在程序运行过程中一直在，但性能最差。NativeArray与Array另一个不同是需要手动回收内存，即调用Dispose()。
 
 
-回头说下NativeContainer。代码中使用NativeArray来存储执行的结果，NativeArray的声明和Array相比多了一个Allocator参数，Allocator参数是个枚举，值分别是Allocator.Temp、Allocator.TempJob、Allocator.Persistent，通常跨Job会使用TempJob。NativeArray与Array另一个不同是需要手动回收内存，即调用Dispose()
+
 

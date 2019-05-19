@@ -46,6 +46,6 @@ var handle2 = new Multiply() { a = 15, b = 30, result = result2 }.Schedule(handl
 
 回头说下NativeContainer。代码中使用NativeArray来存储执行的结果，NativeArray的声明和Array相比多了一个Allocator参数，Allocator参数是个枚举，值分别是Allocator.Temp、Allocator.TempJob、Allocator.Persistent。三者的区别是生命周期不同和性能差别，Temp用于一帧内即回收数据，性能最好；TempJob生命周期是4帧，通常用于Job中，性能次于Temp；Persistent可以在程序运行过程中一直在，但性能最差。NativeArray与Array另一个不同是需要手动回收内存，即调用Dispose()。
 
+在正常的Job System代码中，NativeContainer是不同Job之间传递数据主要方式，对多线程的写冲突也主要在NativeContainer上处理。实际上JobSystem并不能完全避免写入冲突问题，开发者还是需要考虑这个问题，JobSystem处理方向是以抛出异常方式对各种问题进行限制。
 
-
-
+主要限制: 如果一个NativeContainer在某一个Job是有写入权限的，那么它不能被另一个Job访问。解决方式: 可以在所有Job struct中标记这个NativeContainer为[ReadOnly]; 用Schedule(handle)标记不同Job的依赖关系，让它们不要并行；对NativeContainer添加[NativeDisableContainerSafetyRestriction]标记，它会关闭安全检查，如果确信不会出问题的话；重新设计数据的组织方式，有时候用新的组织方式并多一个Job来处理两Job的交集问题是更好的方法

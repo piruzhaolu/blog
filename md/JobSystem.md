@@ -1,4 +1,4 @@
-# DOTS之一 Job System 介绍
+# Unity DOTS(一) Job System 介绍
 
 Job System 官方全名叫 Unity C# Job System，个人理解就是Unity开发的基于C#的多线程管理系统。对于多线程Unity一直都支持的，可以直接在unity中用C#创建线程，不过内部除了IO、渲染少数几个模块，主逻辑模块没有支持多线程，开发者也不能使用多线程处理GameObject。
 

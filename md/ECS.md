@@ -121,6 +121,7 @@ public struct SineTag : IComponentData
 
 以上就是一个ECS的简单示例。数据导向设计只是一点个人看法，程序设计需要具体场合分析与权衡，这里仅供参考。ECS性能方面的优点和细节列些参考在后面。[示例完整代码](https://github.com/piruzhaolu/blog/tree/master/BlogProject/Assets/DOTS)
 
+---
 
 [详解实体组件系统ECS](https://connect.unity.com/p/xiang-jie-shi-ti-zu-jian-xi-tong-ecs)  官方的介绍，前半部分有关于内存方面的简单介绍
 

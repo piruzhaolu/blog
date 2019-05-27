@@ -59,7 +59,7 @@ struct RotateJob : IJobForEach<Rotation, RotateSpeed>
 }
 ```
 
-而上下移动的SineMotionSystem结构是一样的，实现逻辑在Execute中，具体的逻辑可以根据想要的效果进行处理，这里传入Time.time,用正sin函数进行上下摆动。
+而上下移动的SineMotionSystem结构是一样的，实现逻辑在Execute中，具体的逻辑可以根据想要的效果进行处理，传入Time.time,用sin函数进行上下摆动。
 ```C#
 struct SineMotionJob : IJobForEach<Translation, SineMotionRange>
 {
@@ -97,10 +97,10 @@ public class ConvertBehaviour : MonoBehaviour, IConvertGameObjectToEntity
 ![](imgs/DOTS_2_1.gif)
 
 
-如果你熟悉GameObject/MonoBehaviour编码方式的话这些代码可能不会让你喜欢，因为创建两个MonoBehaviour文件很少几行代码就可以完成同样的功能，而这里可能需要五个文件近百行代码，而且很多Unity的使用方式都变了，连改变坐标都是新的方式。当然，Unity宣传的性能提升对程序员有很强的吸引力，但如果你的项目的性能瓶颈不在CPU，ECS是否还有吸引力？个人觉得还是有的，因为在游戏开发中组合是远优于继承的，ECS又把数据组合发挥到极致，Unity官方称之为Data-Oriented(数据导向)。但这可能也正是ECS一大缺点，因为OOP更接近人类本能的认知方式。<!--我们很小就会区分植物动物，爬行动物哺乳动物，猫科犬科，一切自然又好用，但如果更深入一些了解生物分类的话就会发现一点都不美好，纲目科属等等非常繁琐，而且有时候还影响认知，比如食肉目下的犬科有一种就主要吃素。-->
+如果你熟悉GameObject/MonoBehaviour编码方式的话这些代码可能不会让你喜欢，因为创建两个MonoBehaviour文件很少几行代码就可以完成同样的功能，而这里可能需要五个文件近百行代码，而且很多Unity的使用方式都变了，连改变坐标都是新的方式。当然，Unity宣传的性能提升对程序员有很强的吸引力，但如果你的项目的性能瓶颈不在CPU，ECS是否还有吸引力？个人觉得还是有的，组合优于继承原则相当适用于游戏开发，ECS又把数据组合发挥到极致，Unity官方称之为Data-Oriented(数据导向)。但这可能也正是ECS一大缺点，因为OOP更接近人类本能的认知方式。<!--我们很小就会区分植物动物，爬行动物哺乳动物，猫科犬科，一切自然又好用，但如果更深入一些了解生物分类的话就会发现一点都不美好，纲目科属等等非常繁琐，而且有时候还影响认知，比如食肉目下的犬科有一种就主要吃素。-->
 
 
-数据导向设计在ECS的应用中主要考虑的就是组件的拆分和ComponentSystem之间的依赖关系。组件拆分的原则是尽量原子化，使代码不需要对组件数据进行if判断和System关注的数据没有冗余数据。比如有一个IComponentData有颜色和形状两个字段，System的逻辑处理只和颜色有关，那么形状数据就冗余了，颜色和形状可以拆分，就像Transform分成位置、旋转和缩放三个组件。如果逻辑中要对红色做专门处理，就需要考虑下红色特殊性是否可以有其它表达，ECS推荐的方式是加一个无数据的IComponentData来标记。这种拆分既更好地应对需求变化也能提高程序性能(CPU分支预测和载入CPU缓存的数据量)。ComponentSystem之间的依赖肯定也少也好，不依赖的System能够很好并行也方便重构和优化，依赖问题也主要靠数据组件的设计，有时候通过处理数据组件并增加System可以很好的处理复杂的藕合问题。
+数据导向设计在ECS的应用中主要考虑的就是组件的拆分和ComponentSystem之间的依赖关系。组件拆分的原则是尽量原子化，使代码不需要对组件数据进行if判断和System关注的数据没有冗余数据。比如有一个IComponentData有颜色和形状两个字段，System的逻辑处理只和颜色有关，那么形状数据就冗余了，颜色和形状可以拆分，就像Transform分成位置、旋转和缩放三个组件。如果逻辑中要对红色做专门处理，就需要考虑下红色特殊性是否可以有其它表达，ECS推荐的方式是加一个无数据的IComponentData来标记。这种拆分既更好地应对需求变化也能提高程序性能(CPU分支预测和载入CPU缓存的数据量)。ComponentSystem之间的依赖肯定也越少越好，不依赖的System能够很好并行也方便重构和优化，依赖问题也主要靠数据组件的设计，有时候通过处理数据组件并增加System可以很好的处理复杂的藕合问题。
 
 我们再根据数据导向设计原则再处理下示例的代码。SineMotionRange组件是和SineMotionSystem直接相关的，可以进行下处理，把上下的运动范围和运动方式分离。
 ```C#
@@ -116,7 +116,7 @@ public struct SineTag : IComponentData
 ```C#
  [RequireComponentTag(typeof(SineTag))]
 ```
-这两者分离后可以加入更多的运动方式和运动范围的组合，上下范围弹动，正弦波处理的缩放等等。
+这两者分离后可以加入更多的运动方式和运动范围的组合，如上下范围弹动，正弦波处理的缩放等等。
 
 
 以上就是一个ECS的简单示例。数据导向设计只是一点个人看法，程序设计需要具体场合分析与权衡，这里仅供参考。ECS性能方面的优点和细节列些参考在后面。[示例完整代码](https://github.com/piruzhaolu/blog/tree/master/BlogProject/Assets/DOTS)

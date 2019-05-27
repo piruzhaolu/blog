@@ -14,6 +14,7 @@ public class RotateSystem : JobComponentSystem
         public void Execute(ref Rotation rotation, ref RotateSpeed speed)
         {
             rotation.Value = math.mul(rotation.Value, quaternion.RotateY(speed.Value* dt));
+            
         }
     }
 
